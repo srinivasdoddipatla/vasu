@@ -1,0 +1,29 @@
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+  "username": "padmavathi",
+  "name": "padma",
+  "password": "ramarap",
+  "gender": "female",
+  "location": "HYD"
+}
+###
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "username": "padmavathi",
+  "password": "ramarap"
+}
+###
+
+POST http://localhost:3000/change-password
+Content-Type: application/json
+
+{
+  "username": "padmavathi",
+  "oldPassword": "ramarap",
+  "newPassword": "ramarao"
+}
