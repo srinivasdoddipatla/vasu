@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 const path = require("path");
-const dbPath = path.join(__dirname, "todoApplication.db");
+const dbPath = path.join(__dirname, "userData.db");
 const { open } = require("sqlite");
 const sqlite3 = require("sqlite3");
 let db = null;
@@ -61,46 +61,38 @@ app.post("/login", async (request, response) => {
   const dbUser = await db.get(selectUserQuery);
   if (dbUser === undefined) {
     response.status(400);
-    response.send("Invalid User");
+    response.send("Invalid user");
   } else {
     const isPasswordMatched = await bcrypt.compare(password, dbUser.password);
     if (isPasswordMatched === true) {
-      response.send("Login Success!");
+      response.send("Login success!");
     } else {
       response.status(400);
-      response.send("Invalid Password");
+      response.send("Invalid password");
     }
   }
 });
 
-app.post("/change-password", async (request, response) => {
+app.put("/change-password", async (request, response) => {
   const { username, oldPassword, newPassword } = request.body;
   selectUserQuery = `SELECT * FROM user WHERE username = '${username}'`;
   const dbUser = await db.get(selectUserQuery);
-  if (dbUser === undefined) {
-    response.status(400);
-    response.send("user not registered");
-  } else {
-    const isPasswordMatched = await bcrypt.compare(
-      oldPassword,
-      dbUser.password
-    );
-    if (isPasswordMatched === true) {
-      const checkPasswordLength = newPassword.length;
-      if (checkPasswordLength < 5) {
-        response.status(400);
-        response.send("Password is too short");
-      } else {
-        let hashedPassword = await bcrypt.hash(newPassword, 10);
-        updatePasswordQuery = `UPDATE user SET password = '${hashedPassword}' WHERE username = '${username}'`;
-        updatePasswordRes = await db.run(updatePasswordQuery);
-        response.status(200);
-        response.send("Password Updated");
-      }
-    } else {
+  const isPasswordMatched = await bcrypt.compare(oldPassword, dbUser.password);
+  if (isPasswordMatched === true) {
+    const checkPasswordLength = newPassword.length;
+    if (checkPasswordLength < 5) {
       response.status(400);
-      response.send("Invalid current password");
+      response.send("Password is too short");
+    } else {
+      let hashedPassword = await bcrypt.hash(newPassword, 10);
+      updatePasswordQuery = `UPDATE user SET password = '${hashedPassword}' WHERE username = '${username}'`;
+      updatePasswordRes = await db.run(updatePasswordQuery);
+      response.status(200);
+      response.send("Password updated");
     }
+  } else {
+    response.status(400);
+    response.send("Invalid current password");
   }
 });
 
